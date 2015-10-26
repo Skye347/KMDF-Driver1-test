@@ -1,0 +1,90 @@
+;
+; KMDFDriver1-test.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=KMDFDriver1-test.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+KMDFDriver1-test.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%KMDFDriver1-test.DeviceDesc%=KMDFDriver1-test_Device, Root\KMDFDriver1-test ; TODO: edit hw-id
+
+[KMDFDriver1-test_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+KMDFDriver1-test.sys
+
+;-------------- Service installation
+[KMDFDriver1-test_Device.NT.Services]
+AddService = KMDFDriver1-test,%SPSVCINST_ASSOCSERVICE%, KMDFDriver1-test_Service_Inst
+
+; -------------- KMDFDriver1-test driver install sections
+[KMDFDriver1-test_Service_Inst]
+DisplayName    = %KMDFDriver1-test.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\KMDFDriver1-test.sys
+
+;
+;--- KMDFDriver1-test_Device Coinstaller installation ------
+;
+
+[DestinationDirs]
+KMDFDriver1-test_Device_CoInstaller_CopyFiles = 11
+
+[KMDFDriver1-test_Device.NT.CoInstallers]
+AddReg=KMDFDriver1-test_Device_CoInstaller_AddReg
+CopyFiles=KMDFDriver1-test_Device_CoInstaller_CopyFiles
+
+[KMDFDriver1-test_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[KMDFDriver1-test_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[SourceDisksFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+[KMDFDriver1-test_Device.NT.Wdf]
+KmdfService =  KMDFDriver1-test, KMDFDriver1-test_wdfsect
+[KMDFDriver1-test_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "KMDFDriver1-test Installation Disk"
+KMDFDriver1-test.DeviceDesc = "KMDFDriver1-test Device"
+KMDFDriver1-test.SVCDESC = "KMDFDriver1-test Service"
